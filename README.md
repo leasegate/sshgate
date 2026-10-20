@@ -9,7 +9,7 @@ sshgate is a [leasegate](https://github.com/leasegate/leasegate) gate for SSH:
 - The keys live in sshgate's encrypted vault; sshgate is an **ssh agent** on its own named pipe, and the private key never leaves it.
 - Each key names the hosts it may be used for. A login anywhere else is refused without a window.
 - Every login goes through the leasegate approval window: which process is asking (and its whole chain, up to the agent or terminal that started it), which host, what command. The human chooses how far up the chain the approval reaches and for how long; it ends when that process exits.
-- Ordinary `ssh` keeps working: `~/.ssh/config` points the host at sshgate's agent and at the key's *public* file.
+- Ordinary `ssh` keeps working: sshgate's own ssh config file points each host at sshgate's agent and at the key's *public* file, and `~/.ssh/config` includes it with one line. Your own entries there are never touched.
 
 ## Setup
 
@@ -27,17 +27,15 @@ sshgate is a [leasegate](https://github.com/leasegate/leasegate) gate for SSH:
 
 2. Start `sshgate.exe` (the tray). Set the passphrase and **write down the recovery key** it shows once.
 3. Tray menu, **SSH keys…**: make a key inside sshgate and add its public half to the server's `~/.ssh/authorized_keys` (from a session that already works), or import an existing key file once and delete the file.
-4. Tray menu, **ssh config lines…** (or `sshgate config`): put the lines in the host's block of `~/.ssh/config`:
+4. `sshgate setup` once. It writes `~/leasegate/sshgate/ssh_config` (a `Host` block per key with hosts: `IdentityAgent`, the key's public file, `IdentitiesOnly yes`) and adds two lines at the top of `~/.ssh/config`: a `# leasegate:sshgate` marker and an `Include` of that file. The tray rewrites the file at every start and whenever settings.toml changes. Your own `Host` block keeps the rest:
 
    ```
    Host myserver
        HostName server.example.org
-       IdentityAgent //./pipe/leasegate-sshgate-agent
-       IdentityFile ~/leasegate/sshgate/keys/myserver.pub
-       IdentitiesOnly yes
+       User admin
    ```
 
-   Forward slashes: Windows OpenSSH does not accept `\\.\pipe\` in `IdentityAgent`.
+   Several leasegate gates (gitgate does the same for GitHub) share `~/.ssh/config` this way: each adds and removes only the two lines under its own marker, and refuses a host another gate already serves. `sshgate setup --undo` removes sshgate's two lines and nothing else. `sshgate config` (or the tray's **ssh config lines…**) shows what the file holds.
 
 5. `ssh myserver` -- the approval window appears.
 
