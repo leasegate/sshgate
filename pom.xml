@@ -137,10 +137,18 @@
                             <copyright>leasegate contributors</copyright>
                             <javaVersion>25+</javaVersion>
                             <jvmMode>dll</jvmMode>
+                            <!-- A tray that holds a few keys: small heap, Serial GC (smallest footprint, gives memory back), C1 only. -->
                             <vmArgs>
-                                <vmArg>-Xms32m</vmArg>
-                                <vmArg>-Xmx256m</vmArg>
-                                <vmArg>-XX:G1PeriodicGCInterval=300000</vmArg>
+                                <vmArg>-Xms16m</vmArg>
+                                <vmArg>-Xmx96m</vmArg>
+                                <vmArg>-Xss512k</vmArg>
+                                <vmArg>-XX:+UseSerialGC</vmArg>
+                                <vmArg>-XX:MinHeapFreeRatio=10</vmArg>
+                                <vmArg>-XX:MaxHeapFreeRatio=30</vmArg>
+                                <vmArg>-XX:TieredStopAtLevel=1</vmArg>
+                                <vmArg>-XX:MaxMetaspaceSize=96m</vmArg>
+                                <vmArg>-XX:ReservedCodeCacheSize=32m</vmArg>
+                                <vmArg>-XX:MaxDirectMemorySize=32m</vmArg>
                                 <vmArg>--enable-native-access=ALL-UNNAMED</vmArg>
                             </vmArgs>
                         </configuration>

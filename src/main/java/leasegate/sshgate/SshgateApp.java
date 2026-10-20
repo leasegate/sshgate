@@ -40,10 +40,11 @@ public final class SshgateApp extends Application {
         keys.writeAllPublic();
 
         var rules = new SshRules(settings);
-        var engine = new LeaseEngine<SshScope>(rules, new BlanketModeApproval<>(new FxApproval<>(gate, rules), gate),
+        var brand = new Brand(Places.PRODUCT, "#8a4b00", GateIcon.image(SshgateApp.class, "brand.png", "#8a4b00"));
+        var engine = new LeaseEngine<SshScope>(rules, new BlanketModeApproval<>(new FxApproval<>(gate, rules, brand), gate),
             new KeyedAppStore<>(Places.home().resolve("keyed-apps.json"), rules));
-        engine.trustApproval(new FxTrust<>(gate, rules));
-        engine.onExpiring(e -> Platform.runLater(() -> ExpiryWarningWindow.show(engine, gate, e)));
+        engine.trustApproval(new FxTrust<>(gate, rules, brand));
+        engine.onExpiring(e -> Platform.runLater(() -> ExpiryWarningWindow.show(engine, gate, brand, e)));
         engine.startSweep();
 
         var control = LeaseServer.open(Places.runDir(), Places.PIPE);
@@ -55,7 +56,7 @@ public final class SshgateApp extends Application {
         Thread.ofPlatform().name("sshgate-agent").daemon().start(() -> agent.serve(agentPipe, "sshgate-agent"));
 
         var entries = settings.getKey().stream().map(k -> new KeysWindow.Entry(k.getId(), k.getLabel())).toList();
-        var tray = new TrayShell<>(stage, engine, gate, GateIcon.image(SshgateApp.class, "tray.png", "#8a4b00"),
+        var tray = new TrayShell<>(stage, engine, gate, brand,
             () -> keys.all().size() + " key(s) · " + engine.activeGrants().size() + " approval(s)");
         tray.addItem(TrayShell.item("SSH keys…", () -> KeysWindow.show(Places.PRODUCT, entries, keys,
                 "Add it to the server's ~/.ssh/authorized_keys (from a session that already works), then test before removing the old key.", () -> {})))
