@@ -129,6 +129,7 @@
                         </executions>
                         <configuration>
                             <name>sshgate</name>
+                            <icon>${project.basedir}/src/main/jr/sshgate.ico</icon>
                             <appId>io.github.leasegate:sshgate</appId>
                             <fileDescription>sshgate</fileDescription>
                             <productName>sshgate</productName>

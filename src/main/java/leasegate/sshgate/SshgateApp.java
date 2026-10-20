@@ -55,7 +55,7 @@ public final class SshgateApp extends Application {
         Thread.ofPlatform().name("sshgate-agent").daemon().start(() -> agent.serve(agentPipe, "sshgate-agent"));
 
         var entries = settings.getKey().stream().map(k -> new KeysWindow.Entry(k.getId(), k.getLabel())).toList();
-        var tray = new TrayShell<>(stage, engine, gate, GateIcon.image("#8a4b00"),
+        var tray = new TrayShell<>(stage, engine, gate, GateIcon.image(SshgateApp.class, "tray.png", "#8a4b00"),
             () -> keys.all().size() + " key(s) · " + engine.activeGrants().size() + " approval(s)");
         tray.addItem(TrayShell.item("SSH keys…", () -> KeysWindow.show(Places.PRODUCT, entries, keys,
                 "Add it to the server's ~/.ssh/authorized_keys (from a session that already works), then test before removing the old key.", () -> {})))
