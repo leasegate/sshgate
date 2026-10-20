@@ -15,9 +15,8 @@ import leasegate.frame.FKeys;
 import leasegate.frame.GateFrame;
 import leasegate.ui.ApprovalParts;
 
-/// The lines that send ssh to the gate for each host, to add to that host's block in
-/// ~/.ssh/config: the gate's agent, the key's PUBLIC file, and only that key. sshgate does not edit
-/// the config itself; the file is the human's.
+/// The lines that send ssh to the gate for each host: the gate's agent, the key's PUBLIC file, and
+/// only that key. `sshgate setup` writes them into sshgate's own ssh config (SshSetup); this shows them.
 final class ConfigLines {
 
     static String text(Settings s) {
@@ -41,7 +40,7 @@ final class ConfigLines {
         area.setStyle("-fx-font-family: Consolas, monospace;");
         Runnable copy = () -> { var c = new ClipboardContent(); c.putString(area.getText()); Clipboard.getSystemClipboard().setContent(c); };
         var keys = new FKeys().bind(KeyCode.F2, "Copy", "#2e6da8", copy).bind(KeyCode.ESCAPE, "Close", "#777", stage::close);
-        var root = new VBox(10, new Label("Put these lines in ~/.ssh/config, replacing that host's old IdentityFile line:"), area, keys.bar,
+        var root = new VBox(10, new Label("sshgate setup puts these in sshgate's own ssh config, included from ~/.ssh/config by one line; shown here for reference:"), area, keys.bar,
             ApprovalParts.small("F2 copy · Esc close", "#777"));
         root.setPadding(new Insets(14));
         root.setPrefWidth(640);

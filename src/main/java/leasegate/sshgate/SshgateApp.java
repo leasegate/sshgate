@@ -49,6 +49,11 @@ public final class SshgateApp extends Application {
         engine.onExpiring(e -> Platform.runLater(() -> ExpiryWarningWindow.show(engine, gate, brand, e)));
         engine.startSweep();
 
+        // the ssh side follows settings.toml: sshgate's own ssh config is rewritten at every start and on every change
+        try { if (SshSetup.installed()) SshSetup.writeFiles(settings); }
+        catch (Exception e) { System.err.println("sshgate: could not refresh " + SshSetup.own() + ": " + e.getMessage()); }
+        Thread.ofPlatform().name("sshgate-settings-watch").daemon().start(SshgateApp::watchSettings);
+
         var control = LeaseServer.open(Places.runDir(), Places.PIPE);
         var agentPipe = LeaseServer.open(Places.runDir(), Places.AGENT_PIPE);
         var agent = new AgentServer(keys::keys, new ServerPolicy(engine, keys, settings));
@@ -65,6 +70,25 @@ public final class SshgateApp extends Application {
             .addItem(TrayShell.item("ssh config lines…", () -> ConfigLines.show(brand, settings)))
             .quit("Quit sshgate (logins with its keys stop until it starts again)", vault::close)
             .install();
+    }
+
+    /// settings.toml changed (a key, a host): sshgate's own ssh config is written again at once. A
+    /// malformed file, or a host another gate serves, is reported and the file is left as it was.
+    static void watchSettings() {
+        try (var w = java.nio.file.FileSystems.getDefault().newWatchService()) {
+            Places.home().register(w, java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY, java.nio.file.StandardWatchEventKinds.ENTRY_CREATE);
+            while (true) {
+                var key = w.take();
+                var changed = key.pollEvents().stream().anyMatch(e -> Places.settings().getFileName().equals(e.context()));
+                key.reset();
+                if (!changed) continue;
+                Thread.sleep(300);  // an editor writes in more than one step
+                try {
+                    if (SshSetup.installed()) { SshSetup.writeFiles(Settings.load(Places.settings())); System.err.println("sshgate: settings.toml changed; ssh config rewritten"); }
+                } catch (Exception e) { System.err.println("sshgate: settings.toml changed but could not be used: " + e.getMessage()); }
+            }
+        } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+        catch (Exception e) { System.err.println("sshgate: cannot watch " + Places.settings() + ": " + e.getMessage()); }
     }
 
     static boolean alreadyRunning() {
