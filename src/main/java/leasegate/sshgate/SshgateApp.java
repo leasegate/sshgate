@@ -37,7 +37,7 @@ public final class SshgateApp extends Application {
         if (alreadyRunning()) { System.err.println("sshgate is already running"); Platform.exit(); return; }
         stage.setTitle(Places.PRODUCT);
         GateFrame.styles(GateFrame.Style.of(settings.getWindows()), GateFrame.Style.of(settings.getResizableWindows()));
-        var brand = new Brand(Places.PRODUCT, "#8a4b00", GateIcon.image(SshgateApp.class, "brand.png", "#8a4b00"));
+        var brand = new Brand(Places.PRODUCT, "#8a4b00", new GateIcons(SshgateApp.class, "sshgate"));
         var vault = VaultUnlock.open(gate, Places.home().resolve("vault.json"), brand);
         var keys = new VaultKeys(vault, Places.keysDir());
         keys.writeAllPublic();
@@ -68,6 +68,7 @@ public final class SshgateApp extends Application {
         tray.addItem(TrayShell.item("SSH keys…", () -> KeysWindow.show(brand, entries, keys,
                 "Add it to the server's ~/.ssh/authorized_keys (from a session that already works), then test before removing the old key.", () -> {})))
             .addItem(TrayShell.item("ssh config lines…", () -> ConfigLines.show(brand, settings)))
+            .describe("guards SSH keys for servers", "https://github.com/leasegate/sshgate")
             .quit("Quit sshgate (logins with its keys stop until it starts again)", vault::close)
             .install();
     }
