@@ -20,6 +20,15 @@ final class ServerPolicy implements SignPolicy {
         this.settings = settings;
     }
 
+    /// ssh is shown only the keys meant for the host it is connecting to: a key with `hosts` listed
+    /// is offered to those hosts alone, a key without any to every host.
+    @Override public java.util.List<leasegate.sshagent.AgentKey> offer(java.util.List<leasegate.sshagent.AgentKey> all, leasegate.core.win.PeerIdentity peer,
+                                                                       java.util.List<leasegate.core.access.ProcessTree.RawLink> chain, String sshCommandLine) {
+        var host = Destination.of(sshCommandLine).host();
+        return all.stream().filter(k -> keys.owner(k).flatMap(settings::byId).map(s -> s.getHosts().isEmpty()
+            || (host != null && s.getHosts().stream().anyMatch(h -> h.equalsIgnoreCase(host)))).orElse(false)).toList();
+    }
+
     @Override public boolean allow(Request r) {
         var id = keys.owner(r.key());
         if (id.isEmpty()) return false;
