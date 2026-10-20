@@ -16,6 +16,9 @@ sshgate is a [leasegate](https://github.com/leasegate/leasegate) gate for SSH:
 1. `~/leasegate/sshgate/settings.toml`:
 
    ```toml
+   windows = 'glow'            # optional: 'glow' (default) or 'native', how sshgate's windows are framed
+   resizableWindows = 'glow'   # optional: 'native' keeps Windows' snap and edge resizing for the resizable ones
+
    [[key]]
    id = 'myserver'
    label = 'the build server'

@@ -15,6 +15,10 @@ import datapotter.datahelper.Data;
 @Data
 public final class Settings extends Settings_A {
     List<ServerKey> key = List.of();
+    /// How the gate's windows are framed, "glow" or "native": fixed-size ones, and resizable ones
+    /// ("native" keeps Windows' snap and edge resizing).
+    String windows = "glow";
+    String resizableWindows = "glow";
 
     public Optional<ServerKey> byId(String id) { return key.stream().filter(k -> k.getId().equalsIgnoreCase(id)).findFirst(); }
 

@@ -12,6 +12,7 @@ import leasegate.sshagent.AgentServer;
 import leasegate.sshagent.VaultKeys;
 import leasegate.transport.LeaseDeniedException;
 import leasegate.transport.Links;
+import leasegate.frame.*;
 import leasegate.ui.*;
 
 /// The sshgate tray: the passphrase opens the gate and its vault, then the agent ssh logs in
@@ -35,12 +36,13 @@ public final class SshgateApp extends Application {
     @Override public void start(Stage stage) {
         if (alreadyRunning()) { System.err.println("sshgate is already running"); Platform.exit(); return; }
         stage.setTitle(Places.PRODUCT);
-        var vault = VaultUnlock.open(gate, Places.home().resolve("vault.json"), Places.PRODUCT);
+        GateFrame.styles(GateFrame.Style.of(settings.getWindows()), GateFrame.Style.of(settings.getResizableWindows()));
+        var brand = new Brand(Places.PRODUCT, "#8a4b00", GateIcon.image(SshgateApp.class, "brand.png", "#8a4b00"));
+        var vault = VaultUnlock.open(gate, Places.home().resolve("vault.json"), brand);
         var keys = new VaultKeys(vault, Places.keysDir());
         keys.writeAllPublic();
 
         var rules = new SshRules(settings);
-        var brand = new Brand(Places.PRODUCT, "#8a4b00", GateIcon.image(SshgateApp.class, "brand.png", "#8a4b00"));
         var engine = new LeaseEngine<SshScope>(rules, new BlanketModeApproval<>(new FxApproval<>(gate, rules, brand), gate),
             new KeyedAppStore<>(Places.home().resolve("keyed-apps.json"), rules));
         engine.trustApproval(new FxTrust<>(gate, rules, brand));
@@ -58,9 +60,9 @@ public final class SshgateApp extends Application {
         var entries = settings.getKey().stream().map(k -> new KeysWindow.Entry(k.getId(), k.getLabel())).toList();
         var tray = new TrayShell<>(stage, engine, gate, brand,
             () -> keys.all().size() + " key(s) · " + engine.activeGrants().size() + " approval(s)");
-        tray.addItem(TrayShell.item("SSH keys…", () -> KeysWindow.show(Places.PRODUCT, entries, keys,
+        tray.addItem(TrayShell.item("SSH keys…", () -> KeysWindow.show(brand, entries, keys,
                 "Add it to the server's ~/.ssh/authorized_keys (from a session that already works), then test before removing the old key.", () -> {})))
-            .addItem(TrayShell.item("ssh config lines…", () -> ConfigLines.show(settings)))
+            .addItem(TrayShell.item("ssh config lines…", () -> ConfigLines.show(brand, settings)))
             .quit("Quit sshgate (logins with its keys stop until it starts again)", vault::close)
             .install();
     }
