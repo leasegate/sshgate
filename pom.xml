@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.github.leasegate</groupId>
     <artifactId>sshgate</artifactId>
-    <version>0.2-SNAPSHOT</version>
+    <version>0.3-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>sshgate</name>
     <description>Server SSH keys behind a leasegate gate: an ssh agent whose keys never leave it, every login to a server approved by a human, per process and for a limited time.</description>
@@ -30,7 +30,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>25</maven.compiler.release>
-        <leasegate.version>0.2-SNAPSHOT</leasegate.version>
+        <leasegate.version>0.2</leasegate.version>
         <jackson.version>2.21.2</jackson.version>
         <datahelper.version>2.0</datahelper.version>
         <main.class>leasegate.sshgate.SshgateMain</main.class>
