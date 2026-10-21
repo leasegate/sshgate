@@ -69,6 +69,7 @@ public final class SshgateApp extends Application {
                 "Add it to the server's ~/.ssh/authorized_keys (from a session that already works), then test before removing the old key.", () -> {})))
             .addItem(TrayShell.item("ssh config lines…", () -> ConfigLines.show(brand, settings)))
             .describe("guards SSH keys for servers", "https://github.com/leasegate/sshgate")
+            .vault(vault::changePassphrase)
             .quit("Quit sshgate (logins with its keys stop until it starts again)", vault::close)
             .install();
     }
